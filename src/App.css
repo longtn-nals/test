@@ -1,0 +1,81 @@
+.App{
+  padding: 50px 100px 0 100px;
+  position: relative;
+}
+.mr-3 {
+  width: 200px;
+  color: #000;
+}
+.mr-3:hover {
+  color: #000;
+  text-decoration: none;
+}
+.list-unstyled {
+  /* height: 150px; */
+  box-shadow: rgb(149 157 165 / 20%) 0px 8px 24px;
+}
+.list-unstyled:hover {
+  box-shadow: rgb(0 0 0 / 35%) 0px 5px 15px;
+}
+.noData {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.btn-primary {
+  margin-bottom: 16px;
+}
+.ontop {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+}
+.bi-caret-up-fill {
+  justify-content: center;
+  display: flex;
+}
+.rowHandle {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.mb-3 {
+  width: 60%;
+  margin-left: 10px;
+}
+.Aligncenter {
+  margin-bottom: 0;
+}
+
+.form-select {
+  padding: 5px;
+  width: 22%;
+}
+
+@media screen and (max-width: 1000px) {
+  .App{
+    padding: 10px 10px 0 10px;
+    /* position: relative; */
+  }
+  .rowHandle {
+    display: block;
+  }
+  .form-select {
+    width: 100%;
+    /* margin-bottom: 40px !important; */
+    padding-bottom: 12px;
+  }
+  .mb-3 {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    margin-left: 0
+  }
+  .btn-primary {
+    width: 100%;
+  }
+}
