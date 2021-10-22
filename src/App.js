@@ -21,117 +21,82 @@ export default function App() {
     page: 1,
     limit: 10,
   })
-  const [searchInput, setSearchInput] = useState(null);
+  const [searchInput, setSearchInput] = useState('');
   const [filteredSearch, setFilteredSearch] = useState([]);
-  const [sort, setSort] = useState ('desc');
+  const [sort, setSort] = useState ('asc');
   const [dataAll, setDataAll] = useState ([]);
-  const [filterstitle, setFilterTitle] = useState (null)
-  const [filteredTitleResults, setFilteredTitleResults] = useState([]);
-  // console.log(filteredTitleResults)
+  const [filtersTitle, setFilterTitle] = useState (null)
+  const [
+    filteredTitleResults, 
+    setFilteredTitleResults] = useState([]);
   useEffect(() => {
+
     async function getDataBlogAll() {
       // call api get data
-      const result = await getDataBlogsAll(null);
+      const result = await getDataBlogsAll();
       // faild
       if (!result) return;
   
       // success
-      // console.log(result)
       setDataAll(result);
     }
-    
     async function getData() {
       if (isNullOrUndefined(filters)) return;
-      const paramString = queryString.stringify(filters);
+      const paramStringPaging = queryString.stringify(filters);
       // show loading
       setisLoading(true);
       // call api get data
-      const result = await getDataBlogs(paramString)
+      const result = await getDataBlogs(paramStringPaging, sort)
       // faild
       if (!result) return;
       // hide loading
       setisLoading(false);
+      //succes
       setData(result);
       setPagination(filters);
-      // setFilteredResults(result)
+      // console.log(result)
     }
+    async function search() {
+      const paramStringPaging = queryString.stringify(filters);
+      // show loading
+      setisLoading(true);
+      // call api get data
+      const result = await getDataSearch(paramStringPaging, sort, searchInput)
+      // faild
+      if (!result) return;
+      
+      // hide loading
+      setisLoading(false);
+      setFilteredSearch(result)
+    }
+
     async function getDataFilter() {
-      if (isNullOrUndefined(filterstitle)) return setFilteredTitleResults(data);
-      const paramString = queryString.stringify(filterstitle);
-      // console.log(paramString)
-      try {
-        const result = await axios.get(`${apiRoot}/blogs?${paramString}`);
-        // error
-        if (result.status !== 200 && result.status !== 201) {
-          return null;
-        }
-        if (result.status === 429 ) {
-          return null;
-        }
-        const filteredData = result.data
-        // console.log(filteredData)
-        setFilteredTitleResults(filteredData)
-      } catch (error) {
-        // console.log(error)
-        return null;
-      }
+      const paramStringPaging = queryString.stringify(filters);
+      // show loading
+      setisLoading(true);
+      // call api get data
+      const result = await callApiGetDataFilter(paramStringPaging, sort, filtersTitle)
+      // faild
+      if (!result) return;
+      
+      // hide loading
+      setisLoading(false);
+      setFilteredTitleResults(result)
     }
     
     getDataBlogAll();
     getData();
+    search();
     getDataFilter();
-  }, [filters, filterstitle]);
+  }, [filters, filtersTitle, sort, searchInput]);
+
   const onTop = () => {
     window.scrollTo(0, 0)
   }
-  
-  // console.log(searchInput)
+
   const searchItems = (searchValue) => {
     setSearchInput(searchValue)
   }
-  useEffect (() => {
-    async function search() {
-      if (isNullOrUndefined(searchInput)) {
-        
-        const paramString = queryString.stringify(filters);
-        try {
-          const result = await axios.get(`${apiRoot}/blogs?${paramString}`);
-          // error
-          if (result.status !== 200 && result.status !== 201) {
-            return null;
-          }
-          if (result.status === 429 ) {
-            return null;
-          }
-          const filteredData = result.data
-          // console.log(filteredData)
-          setFilteredSearch(filteredData)
-        } catch (error) {
-          // console.log(error)
-          // return null;
-        }
-      } else {
-        try {
-          const result = await axios.get(`${apiRoot}/blogs?search=${searchInput}`);
-          // error
-          if (result.status !== 200 && result.status !== 201) {
-            return null;
-          }
-          if (result.status === 429 ) {
-            return null;
-          }
-          const filteredData = result.data
-          // console.log(filteredData)
-          setFilteredSearch(filteredData)
-        } catch (error) {
-          // console.log(error)
-          // return null;
-        }
-      }
-    }
-    search();
-  },[searchInput])
-
   const handlePageChange = (newPage) => {
     setFilter({
       ...filters,
@@ -140,7 +105,7 @@ export default function App() {
   };
 // render books
 const blogs = [];
-{!isNullOrEmpty(filteredTitleResults) ? (
+!isNullOrEmpty(filtersTitle) ? (
   filteredTitleResults.map((row, i) => {
     blogs.push(
       <ul className="list-unstyled" key={i}>
@@ -155,7 +120,7 @@ const blogs = [];
         </a>
       </ul>
     )}
-  )) :
+  )) : 
   !isNullOrUndefined(searchInput) ? (
   filteredSearch.map((row, i) => {
     blogs.push(
@@ -186,24 +151,16 @@ const blogs = [];
           </li>
         </a>
       </ul>
-    )}
-  ))}
+    )}))
+  
   const handleSort = async (flag) => {
-    const paramString = queryString.stringify(filters);
-
-    // show loading
-    setisLoading(true);
+    // console.log(flag)
     if (!isNullOrUndefined(flag) && flag === 'asc') {
       setSort('desc')
     } else if (!isNullOrUndefined(flag) && flag === 'desc') {
       setSort('asc')
     }
-    const result = await getDataBlogsSort(paramString, sort);
-    // faild
-    if (!result) return;
-    // show loading
-    setisLoading(false);
-    setData(result)
+    // console.log(sort)
   }
   // rending option title
   const optionTitle = []
@@ -222,16 +179,11 @@ const blogs = [];
       </option>
     );
   }))
-  const handleChange = name => e => {
-    setFilterTitle({
-      ...filterstitle,
-      [name]: e.target.value});
-    // console.log(filterstitle)
+  const handleChange = e => {
+    let val = e.target.value;
+    setFilterTitle(val);
   };
-  
-  // console.log(filteredSearch)
-  // console.log(filteredResults)
-  // console.log(searchInput)
+
   return (
     <div className="App">
       <button
@@ -249,13 +201,13 @@ const blogs = [];
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => handleSort('asc')}>sort by createdAt Asc
+            onClick={() => handleSort('asc')}>sort by createdAt Desc
           </button>
         ) : (
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => handleSort('desc')}>sort by createdAt Desc
+            onClick={() => handleSort('desc')}>sort by createdAt Asc
           </button>
         )}
         <div className="input-group mb-3 ">
@@ -265,9 +217,9 @@ const blogs = [];
         </div>
         <select className="form-select mb-3 Aligncenter" aria-label="Default select example"
         defaultValue={''}
-        onChange={handleChange('filter')}
+        onChange={handleChange}
         >
-          <option value='' disabled >Filter title</option>
+          <option value='' >Filter title</option>
             {optionTitle}
         </select>
       </div>
@@ -282,7 +234,7 @@ const blogs = [];
       ) : (
         blogs
       )}
-      {!isNullOrUndefined(searchInput) || !filteredSearch || !isNullOrUndefined(filterstitle)  ?  '' : (
+      {!isNullOrUndefined(searchInput) || !filteredSearch || !isNullOrUndefined(filtersTitle)  ?  '' : (
         <Pagination
           pagination={pagination}
           onPageChange={handlePageChange}
@@ -310,14 +262,13 @@ async function getDataBlogsAll() {
   }
 }
 //get data
-async function getDataBlogs(paramString) {
+async function getDataBlogs(paramStringPaging, sort) {
+  let url = `${apiRoot}/blogs?${paramStringPaging}`;
+  if (sort === 'desc') {
+    url = `${apiRoot}/blogs?${paramStringPaging}&sortBy=createdAt&order=${sort}`;
+  }
   try {
-    let res;
-    if (paramString) {
-      res = await axios.get(`${apiRoot}/blogs?${paramString}`);
-    } else {
-      res = await axios.get(`${apiRoot}/blogs`);
-    }
+    const res = await axios.get( url );
     // error
     if (res.status !== 200 && res.status !== 201) {
       return null;
@@ -325,29 +276,52 @@ async function getDataBlogs(paramString) {
     if (res.status === 429 ) {
       return null;
     }
-    // console.log(res);
     return res.data;
   } catch (error) {
     // console.log(error)
     return null;
   }
 }
-//get data sort
-async function getDataBlogsSort(paramString, descOrAsc) {
-  // console.log(descOrAsc)
-  try {
-    const res = await axios.get( `${apiRoot}/blogs?${paramString}&sortBy=createdAt&order=${descOrAsc}` );
-    // error
-    if (res.status !== 200 && res.status !== 201) {
-      return null;
+// search=z&filter=Books%20Shores%20AGP&sortBy=createdAt&order=asc
+//get data search & filter
+async function getDataSearch(paramStringPaging, sort, searchInput) {
+  let url = `${apiRoot}/blogs?search=${searchInput}&sortBy=createdAt&order=${sort}`;
+    if (searchInput === '') {
+      url = `${apiRoot}/blogs?${paramStringPaging}&sortBy=createdAt&order=${sort}`;
     }
-    if (res.status === 429 ) {
+    try {
+      const res = await axios.get( url );
+      // error
+      if (res.status !== 200 && res.status !== 201) {
+        return null;
+      }
+      if (res.status === 429 ) {
+        return null;
+      }
+      return res.data;
+    } catch (error) {
+      // console.log(error)
       return null;
+  }
+}
+//get data search & filter
+async function callApiGetDataFilter(paramStringPaging, sort, filterstitle) {
+  let url = `${apiRoot}/blogs?${paramStringPaging}&sortBy=createdAt&order=${sort}`;
+    if (filterstitle !== '') {
+      url = `${apiRoot}/blogs?filter=${filterstitle}&sortBy=createdAt&order=${sort}`;
     }
-    // console.log(res);
-    return res.data;
-  } catch (error) {
-    // console.log(error)
-    return null;
+    try {
+      const res = await axios.get( url );
+      // error
+      if (res.status !== 200 && res.status !== 201) {
+        return null;
+      }
+      if (res.status === 429 ) {
+        return null;
+      }
+      return res.data;
+    } catch (error) {
+      // console.log(error)
+      return null;
   }
 }
