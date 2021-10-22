@@ -27,7 +27,7 @@ export default function App() {
   const [dataAll, setDataAll] = useState ([]);
   const [filterstitle, setFilterTitle] = useState (null)
   const [filteredTitleResults, setFilteredTitleResults] = useState([]);
-  // console.log(data)
+  // console.log(filteredTitleResults)
   useEffect(() => {
     async function getDataBlogAll() {
       // call api get data
@@ -207,7 +207,7 @@ const blogs = [];
   }
   // rending option title
   const optionTitle = []
-  !isNullOrEmpty(filteredSearch) ? (
+  !isNullOrEmpty(searchInput) ? (
     filteredSearch.map(e => {
     optionTitle.push (
       <option value={e.title} key={e.id}>
@@ -229,7 +229,7 @@ const blogs = [];
     // console.log(filterstitle)
   };
   
-  // console.log(filteredTitleResults)
+  // console.log(filteredSearch)
   // console.log(filteredResults)
   // console.log(searchInput)
   return (
