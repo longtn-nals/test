@@ -26,9 +26,8 @@ export default function App() {
   const [sort, setSort] = useState ('asc');
   const [dataAll, setDataAll] = useState ([]);
   const [filtersTitle, setFilterTitle] = useState (null)
-  const [
-    filteredTitleResults, 
-    setFilteredTitleResults] = useState([]);
+  const [filteredTitleResults, setFilteredTitleResults] = useState([]);
+
   useEffect(() => {
 
     async function getDataBlogAll() {
@@ -54,8 +53,8 @@ export default function App() {
       //succes
       setData(result);
       setPagination(filters);
-      // console.log(result)
     }
+
     async function search() {
       const paramStringPaging = queryString.stringify(filters);
       // show loading
@@ -75,7 +74,7 @@ export default function App() {
       // show loading
       setisLoading(true);
       // call api get data
-      const result = await callApiGetDataFilter(paramStringPaging, sort, filtersTitle)
+      const result = await callApiGetDataFilter(paramStringPaging, sort, filtersTitle, searchInput)
       // faild
       if (!result) return;
       
@@ -90,18 +89,35 @@ export default function App() {
     getDataFilter();
   }, [filters, filtersTitle, sort, searchInput]);
 
+  //btn len top
   const onTop = () => {
     window.scrollTo(0, 0)
   }
 
+  //handle search
   const searchItems = (searchValue) => {
     setSearchInput(searchValue)
   }
+  //handle set page
   const handlePageChange = (newPage) => {
     setFilter({
       ...filters,
       page: newPage,
     })
+  };
+  // handle sort
+  const handleSort = async (flag) => {
+    // console.log(flag)
+    if (!isNullOrUndefined(flag) && flag === 'asc') {
+      setSort('desc')
+    } else if (!isNullOrUndefined(flag) && flag === 'desc') {
+      setSort('asc')
+    }
+  }
+  // handle filter title
+  const handleChange = e => {
+    let val = e.target.value;
+    setFilterTitle(val);
   };
 // render books
 const blogs = [];
@@ -152,16 +168,7 @@ const blogs = [];
         </a>
       </ul>
     )}))
-  
-  const handleSort = async (flag) => {
-    // console.log(flag)
-    if (!isNullOrUndefined(flag) && flag === 'asc') {
-      setSort('desc')
-    } else if (!isNullOrUndefined(flag) && flag === 'desc') {
-      setSort('asc')
-    }
-    // console.log(sort)
-  }
+
   // rending option title
   const optionTitle = []
   !isNullOrEmpty(searchInput) ? (
@@ -179,10 +186,6 @@ const blogs = [];
       </option>
     );
   }))
-  const handleChange = e => {
-    let val = e.target.value;
-    setFilterTitle(val);
-  };
 
   return (
     <div className="App">
@@ -305,10 +308,13 @@ async function getDataSearch(paramStringPaging, sort, searchInput) {
   }
 }
 //get data search & filter
-async function callApiGetDataFilter(paramStringPaging, sort, filterstitle) {
+async function callApiGetDataFilter(paramStringPaging, sort, filterstitle, searchInput) {
   let url = `${apiRoot}/blogs?${paramStringPaging}&sortBy=createdAt&order=${sort}`;
     if (filterstitle !== '') {
       url = `${apiRoot}/blogs?filter=${filterstitle}&sortBy=createdAt&order=${sort}`;
+    }
+    if (searchInput !== '' && filterstitle !== '') {
+      url = `${apiRoot}/blogs?search=${searchInput}&filter=${filterstitle}&sortBy=createdAt&order=${sort}`;
     }
     try {
       const res = await axios.get( url );
