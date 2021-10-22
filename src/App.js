@@ -56,13 +56,14 @@ export default function App() {
     }
 
     async function search() {
+      if(isNullOrUndefined(searchInput)) return;
       const paramStringPaging = queryString.stringify(filters);
       // show loading
       setisLoading(true);
       // call api get data
       const result = await getDataSearch(paramStringPaging, sort, searchInput)
       // faild
-      if (!result) return;
+      if (!result) return alert('nhan cham thoi. status 429. hay f5 lai');
       
       // hide loading
       setisLoading(false);
@@ -95,8 +96,9 @@ export default function App() {
   }
 
   //handle search
-  const searchItems = (searchValue) => {
-    setSearchInput(searchValue)
+  const searchItems = (e) => {
+    let val = e.target.value
+    setSearchInput(val)
   }
   //handle set page
   const handlePageChange = (newPage) => {
@@ -136,38 +138,37 @@ const blogs = [];
         </a>
       </ul>
     )}
-  )) : 
-  !isNullOrUndefined(searchInput) ? (
-  filteredSearch.map((row, i) => {
-    blogs.push(
-      <ul className="list-unstyled" key={i}>
-        <a className="mr-3" href={`${folderRoot}ViewForm/${row.id}`}>
-          <li className="media">
-              <img src={row.image} className="mr-3" alt='img' />
-              <div className="media-body">
-                <h5 className="mt-0 mb-1">{row.title}</h5>
-                {row.content}
-              </div>
-          </li>
-        </a>
-      </ul>
-    )}
-  )) : (
-  data.length > 0 &&
-  data.map((row, i) => {
-    blogs.push(
-      <ul className="list-unstyled" key={i}>
-        <a className="mr-3" href={`${folderRoot}ViewForm/${row.id}`}>
-          <li className="media">
-              <img src={row.image} className="mr-3" alt='img' />
-              <div className="media-body">
-                <h5 className="mt-0 mb-1">{row.title}</h5>
-                {row.content}
-              </div>
-          </li>
-        </a>
-      </ul>
-    )}))
+  )) : !isNullOrUndefined(searchInput) ? (
+    filteredSearch.map((row, i) => {
+      blogs.push(
+        <ul className="list-unstyled" key={i}>
+          <a className="mr-3" href={`${folderRoot}ViewForm/${row.id}`}>
+            <li className="media">
+                <img src={row.image} className="mr-3" alt='img' />
+                <div className="media-body">
+                  <h5 className="mt-0 mb-1">{row.title}</h5>
+                  {row.content}
+                </div>
+            </li>
+          </a>
+        </ul>
+      )}
+    )) : (
+    data.length > 0 &&
+    data.map((row, i) => {
+      blogs.push(
+        <ul className="list-unstyled" key={i}>
+          <a className="mr-3" href={`${folderRoot}ViewForm/${row.id}`}>
+            <li className="media">
+                <img src={row.image} className="mr-3" alt='img' />
+                <div className="media-body">
+                  <h5 className="mt-0 mb-1">{row.title}</h5>
+                  {row.content}
+                </div>
+            </li>
+          </a>
+        </ul>
+      )}))
 
   // rending option title
   const optionTitle = []
@@ -215,7 +216,7 @@ const blogs = [];
         )}
         <div className="input-group mb-3 ">
           <input type="text" className="form-control" placeholder="search" aria-label="Recipient's username" aria-describedby="button-addon2"
-          onChange={(e) => searchItems(e.target.value)}
+          onChange={(e) => searchItems(e)}
           />
         </div>
         <select className="form-select mb-3 Aligncenter" aria-label="Default select example"
