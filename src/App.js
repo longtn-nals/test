@@ -21,13 +21,17 @@ export default function App() {
     page: 1,
     limit: 10,
   })
-  const [searchInput, setSearchInput] = useState('');
-  const [filteredResults, setFilteredResults] = useState([]);
+  const [searchInput, setSearchInput] = useState(null);
+  const [filteredSearch, setFilteredSearch] = useState([]);
   const [sort, setSort] = useState ('desc');
   const [dataAll, setDataAll] = useState ([]);
   const [filterstitle, setFilterTitle] = useState (null)
   const [filteredTitleResults, setFilteredTitleResults] = useState([]);
-// console.log(filteredTitleResults)
+  console.log(filteredTitleResults)
+  console.log(filterstitle)
+  console.log(filteredSearch)
+  console.log(searchInput)
+  // console.log(data)
   useEffect(() => {
     async function getDataBlogAll() {
       // call api get data
@@ -53,9 +57,10 @@ export default function App() {
       setisLoading(false);
       setData(result);
       setPagination(filters);
+      // setFilteredResults(result)
     }
     async function getDataFilter() {
-      if (isNullOrUndefined(filterstitle)) return;
+      if (isNullOrUndefined(filterstitle)) return setFilteredTitleResults(data);
       const paramString = queryString.stringify(filterstitle);
       // console.log(paramString)
       try {
@@ -84,37 +89,53 @@ export default function App() {
     window.scrollTo(0, 0)
   }
   
-  console.log(searchInput)
+  // console.log(searchInput)
   const searchItems = (searchValue) => {
     setSearchInput(searchValue)
   }
   useEffect (() => {
     async function search() {
-    if (isNullOrUndefined(searchInput)) {
-      setFilteredResults(data)
-    }
-    else{
-      try {
-        const result = await axios.get(`${apiRoot}/blogs?search=${searchInput}`);
-        // error
-        if (result.status !== 200 && result.status !== 201) {
-          return null;
+      if (isNullOrUndefined(searchInput)) {
+        
+        const paramString = queryString.stringify(filters);
+        try {
+          const result = await axios.get(`${apiRoot}/blogs?${paramString}`);
+          // error
+          if (result.status !== 200 && result.status !== 201) {
+            return null;
+          }
+          if (result.status === 429 ) {
+            return null;
+          }
+          const filteredData = result.data
+          // console.log(filteredData)
+          setFilteredSearch(filteredData)
+        } catch (error) {
+          // console.log(error)
+          // return null;
         }
-        if (result.status === 429 ) {
-          return null;
+      } else {
+        try {
+          const result = await axios.get(`${apiRoot}/blogs?search=${searchInput}`);
+          // error
+          if (result.status !== 200 && result.status !== 201) {
+            return null;
+          }
+          if (result.status === 429 ) {
+            return null;
+          }
+          const filteredData = result.data
+          // console.log(filteredData)
+          setFilteredSearch(filteredData)
+        } catch (error) {
+          // console.log(error)
+          // return null;
         }
-        const filteredData = result.data
-        // console.log(filteredData)
-        setFilteredResults(filteredData)
-      } catch (error) {
-        // console.log(error)
-        // return null;
       }
     }
-  }
-  
-  search();
-},[searchInput])
+    search();
+  },[searchInput])
+
   const handlePageChange = (newPage) => {
     setFilter({
       ...filters,
@@ -139,8 +160,8 @@ const blogs = [];
       </ul>
     )}
   )) :
-  !isNullOrEmpty(searchInput) ? (
-  filteredResults.map((row, i) => {
+  !isNullOrUndefined(searchInput) ? (
+  filteredSearch.map((row, i) => {
     blogs.push(
       <ul className="list-unstyled" key={i}>
         <a className="mr-3" href={`${folderRoot}ViewForm/${row.id}`}>
@@ -190,14 +211,21 @@ const blogs = [];
   }
   // rending option title
   const optionTitle = []
-  !isNullOrEmpty(dataAll) &&
+  !isNullOrEmpty(filteredSearch) ? (
+    filteredSearch.map(e => {
+    optionTitle.push (
+      <option value={e.title} key={e.id}>
+        {e.title}
+      </option>
+    );
+  })) : (
   dataAll.map(e => {
     optionTitle.push (
       <option value={e.title} key={e.id}>
         {e.title}
       </option>
     );
-  });
+  }))
   const handleChange = name => e => {
     setFilterTitle({
       ...filterstitle,
@@ -205,10 +233,9 @@ const blogs = [];
     // console.log(filterstitle)
   };
   
-  // console.log(filteredResults)
   // console.log(filteredTitleResults)
   // console.log(filteredResults)
-  // console.log(dataAll)
+  // console.log(searchInput)
   return (
     <div className="App">
       <button
@@ -241,10 +268,10 @@ const blogs = [];
           />
         </div>
         <select className="form-select mb-3 Aligncenter" aria-label="Default select example"
-        defaultValue={'DEFAULT'}
+        defaultValue={''}
         onChange={handleChange('filter')}
         >
-          <option value="DEFAULT" disabled>Filter title</option>
+          <option value='' disabled >Filter title</option>
             {optionTitle}
         </select>
       </div>
@@ -254,12 +281,12 @@ const blogs = [];
             <span className="sr-only">Loading...</span>
           </div>
         </div>
-      ) : isNullOrEmpty(blogs) ? (
+      ) : isNullOrEmpty(blogs) && isNullOrEmpty(filteredSearch) ? (
         <span className="noData">No Data</span>
       ) : (
         blogs
       )}
-      {!isNullOrEmpty(searchInput) || !isNullOrEmpty(filteredTitleResults)  ?  '' : (
+      {!isNullOrUndefined(searchInput) || !filteredSearch || !isNullOrUndefined(filterstitle)  ?  '' : (
         <Pagination
           pagination={pagination}
           onPageChange={handlePageChange}
