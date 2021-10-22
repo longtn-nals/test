@@ -27,10 +27,6 @@ export default function App() {
   const [dataAll, setDataAll] = useState ([]);
   const [filterstitle, setFilterTitle] = useState (null)
   const [filteredTitleResults, setFilteredTitleResults] = useState([]);
-  console.log(filteredTitleResults)
-  console.log(filterstitle)
-  console.log(filteredSearch)
-  console.log(searchInput)
   // console.log(data)
   useEffect(() => {
     async function getDataBlogAll() {
