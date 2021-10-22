@@ -84,17 +84,14 @@ export default function App() {
     window.scrollTo(0, 0)
   }
   
-  // console.log(searchInput)
-  const searchItems = async (searchValue) => {
+  console.log(searchInput)
+  const searchItems = (searchValue) => {
     setSearchInput(searchValue)
-    // console.log(searchInput)
+  }
+  useEffect (() => {
+    async function search() {
     if (isNullOrUndefined(searchInput)) {
-      
       setFilteredResults(data)
-      // console.log(searchInput)
-      // const filteredData = dataAll.filter((item) => {
-      //     return Object.values(item).join('').toLowerCase().includes(searchInput.toLowerCase())
-      // })
     }
     else{
       try {
@@ -115,6 +112,9 @@ export default function App() {
       }
     }
   }
+  
+  search();
+},[searchInput])
   const handlePageChange = (newPage) => {
     setFilter({
       ...filters,
